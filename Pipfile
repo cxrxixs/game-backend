@@ -10,10 +10,10 @@ django-environ = "==0.11.2"
 django-redis = "==5.4.0"
 python-dotenv = "==1.0.1"
 
-
 [dev-packages]
 ruff = "==0.8.4"
 ruff-lsp = "==0.0.59"
+ipython = "==8.31.0"
 
 [requires]
 python_version = "3.12"

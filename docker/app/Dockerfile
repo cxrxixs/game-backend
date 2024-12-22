@@ -41,6 +41,11 @@ FROM base as dev
 # Copy the scripts that starts the development application server (runserver)
 COPY --chown=web:web ./docker/app/start-dev-server.sh /usr/local/bin/start-dev-server.sh
 USER root
+# Copy Python dependency list
+COPY --chown=web:web ./requirements/dev.txt requirements/dev.txt
+# Install python packages at system level
+RUN pip install --no-cache-dir -r requirements/dev.txt
+
 RUN chmod +x /usr/local/bin/start-dev-server.sh
 USER web
 # The development server starts by default when the container starts
