@@ -1,0 +1,54 @@
+services:
+  db:
+    container_name: postgresql-15
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    ports:
+      - 5439:${DB_PORT}
+    volumes:
+      - ./db/psql-init/db.sql:/docker-entrypoint-initdb.d/db.sql
+      - postgres_data:/var/lib/postgresql/data/
+
+  cache:
+    container_name: redis-7
+    image: redis:7.2.4-alpine
+    restart: always
+    environment:
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+    ports:
+      - 6380:${REDIS_PORT}
+
+  app:
+    container_name: web-app
+    build:
+      context: ../
+      dockerfile: ./docker/app/Dockerfile
+      target: dev
+    restart: always
+    depends_on:
+      - db
+      - cache
+    environment:
+      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}
+      - DJANGO_ENVIRONMENT=${DJANGO_ENVIRONMENT}
+      - DEBUG=${DEBUG}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+    volumes:
+      - ../:/home/web/code
+    ports:
+      - 8000:8000
+
+volumes:
+  postgres_data:
