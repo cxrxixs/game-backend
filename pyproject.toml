@@ -1,0 +1,84 @@
+[project]
+requires-python = "==3.11"
+
+[tool.ruff]
+line-length = 120
+indent-width = 4
+exclude = [
+        "migrations", ".venv",
+]
+
+
+[tool.black]
+# line-length = 88
+skip-string-normalization = true
+
+
+[tool.ruff.format]
+# Quote style
+quote-style = "double"  # Same as black
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+# Other formatting rules to match black
+preview = true  # Enable preview style
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+    ]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+force-wrap-aliases = true
+known-first-party = ["spaminator"]  # Replace with your project's name
+known-third-party = ["django"]  # Add your third-party packages
+section-order = [
+    "future",
+    "standard-library",
+    "third-party",
+    "first-party",
+    "local-folder",
+]
+
+
+
+# [tool.ruff.lint.pydocstyle]
+# convention = "google"
+
+
+[tool.djlint]
+indent=4
+blank_line_after_tag="load,extends,include"
+close_void_tags=true
+
+format_js=true
+format_css=true
+
+[tool.djlint.css]
+indent_size=2
+
+[tool.djlint.js]
+indent_size=2
+
+
+# Pytest
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "core.settings-test"
+python_files = "test_*.py"
+
+
+[tool.coverage.run]
+omit = [
+     "*/conftest.py",
+     "*/__init__.py",
+     "*/settings*",
+     "*/apps.py",
+     "*/admin.py",
+     "*/migrations/*",
+     "*/tests/*",
+]
