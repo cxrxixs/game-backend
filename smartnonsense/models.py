@@ -12,14 +12,6 @@ class Question(models.Model):
         on_delete=models.CASCADE,
     )
     text = models.TextField()  # The question text
-    # correct_answer = models.ForeignKey(
-    #     "Option",
-    #     related_name="correct_answer_for",
-    #     on_delete=models.SET_NULL,
-    #     blank=True,
-    #     null=True,
-    #     help_text="The correct answer must be one of the options for this question.",
-    # )
     image_url = models.URLField(blank=True, null=True)  # Optional image URL for the question
 
     @property
@@ -33,10 +25,8 @@ class Question(models.Model):
 class Option(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    question = models.ForeignKey(
-        Question, related_name="options", on_delete=models.CASCADE
-    )  # Each option is tied to a question
-    text = models.CharField(max_length=255)  # Option text
+    question = models.ForeignKey(Question, related_name="options", on_delete=models.CASCADE)
+    text = models.CharField(max_length=255)
     is_correct = models.BooleanField(default=False, blank=True)
 
     def __str__(self):
@@ -49,9 +39,7 @@ class Option(models.Model):
 class Solution(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    question = models.OneToOneField(
-        Question, related_name="solution", on_delete=models.CASCADE
-    )  # Each question has one solution
+    question = models.OneToOneField(Question, related_name="solution", on_delete=models.CASCADE)
     content = models.TextField()  # Solution content
 
     def __str__(self):
@@ -61,12 +49,13 @@ class Solution(models.Model):
 class SolutionStep(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    solution = models.ForeignKey(
-        Solution, related_name="steps", on_delete=models.CASCADE
-    )  # Each step is tied to a solution
+    solution = models.ForeignKey(Solution, related_name="steps", on_delete=models.CASCADE)
     title = models.TextField()
     result = models.TextField()
     image_url = models.URLField(blank=True, null=True)  # Optional image URL for the step
 
+    class Meta:
+        ordering = ["created_at"]
+
     def __str__(self):
-        return self.title
+        return strip_tags(self.title)[:50]
