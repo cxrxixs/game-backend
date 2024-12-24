@@ -41,6 +41,7 @@ class Solution(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     question = models.OneToOneField(Question, related_name="solution", on_delete=models.CASCADE)
     content = models.TextField()  # Solution content
+    image_url = models.URLField(blank=True, null=True)  # Optional image URL for the solution
 
     def __str__(self):
         return f"Solution for: {strip_tags(self.question.text)[:50]}"
