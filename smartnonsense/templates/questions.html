@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="row mt-4">
+            <div class="col text-center">
+                <h1>QUESTIONS</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                {% for question in questions %}
+                    <div>
+                        <strong>QUESTION {{ forloop.counter }}:</strong>{{ question.text |safe }}
+                    </div>
+                    <div>
+                        <strong>SOLUTION:</strong> {{ question.solution.content | safe }}
+                    </div>
+                    <div>
+                        <strong>STEPS:</strong>
+                    </div>
+                    {% for step in question.solution.steps.all %}
+                        <p>
+                            <strong>STEP {{ forloop.counter }}</strong>
+                        </p>
+                        <div>{{ step.title | safe }}</div>
+                        <div>
+                            <p>
+                                <strong>RESULT</strong>
+                            </p>
+                            {{ step.result | safe }}
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}
