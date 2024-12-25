@@ -2,67 +2,6 @@ from rest_framework import serializers
 
 from smartnonsense.models import Option, Question, Solution, SolutionStep, Tag
 
-"""
-class SolutionStepSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SolutionStep
-        fields = [
-            "id",
-            "title",
-            "result",
-            "image_url",
-            "created_at",
-            "updated_at",
-        ]
-
-
-class SolutionSerializer(serializers.ModelSerializer):
-    steps = SolutionStepSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = Solution
-        fields = [
-            "id",
-            "content",
-            "image_url",
-            "steps",
-            "created_at",
-            "updated_at",
-        ]
-
-
-class TagSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tag
-        fields = [
-            "id",
-            "name",
-        ]
-
-
-class QuestionSerializer(serializers.ModelSerializer):
-    solution = SolutionSerializer(read_only=True)
-    tags = TagSerializer(many=True, read_only=True)
-    correct_answer = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Question
-        fields = [
-            "id",
-            "created_at",
-            "updated_at",
-            "author",
-            "text",
-            "image_url",
-            "tags",
-            "correct_answer",
-            "solution",
-        ]
-
-    def get_correct_answer(self, obj):
-        return obj.correct_answer.text if obj.correct_answer else None
-"""
-
 
 class SolutionStepSerializer(serializers.ModelSerializer):
     Title = serializers.CharField(source="title")

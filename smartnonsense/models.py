@@ -22,9 +22,9 @@ class Question(models.Model):
         related_name="authored_questions",
         on_delete=models.CASCADE,
     )
-    text = models.TextField()  # The question text
-    image_url = models.URLField(blank=True, null=True)  # Optional image URL for the question
-    tags = models.ManyToManyField(Tag, related_name="questions")  # Many-to-many relationship with Tag
+    text = models.TextField()
+    image_url = models.URLField(blank=True, null=True)
+    tags = models.ManyToManyField(Tag, related_name="questions")
 
     class Meta:
         ordering = ["created_at"]
@@ -48,15 +48,15 @@ class Option(models.Model):
         return self.text
 
     class Meta:
-        unique_together = ("question", "text")  # Ensure options are unique for a specific question
+        unique_together = ("question", "text")
 
 
 class Solution(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     question = models.OneToOneField(Question, related_name="solution", on_delete=models.CASCADE)
-    content = models.TextField()  # Solution content
-    image_url = models.URLField(blank=True, null=True)  # Optional image URL for the solution
+    content = models.TextField()
+    image_url = models.URLField(blank=True, null=True)
 
     def __str__(self):
         return f"Solution for: {strip_tags(self.question.text)[:50]}"
@@ -68,7 +68,7 @@ class SolutionStep(models.Model):
     solution = models.ForeignKey(Solution, related_name="steps", on_delete=models.CASCADE)
     title = models.TextField()
     result = models.TextField()
-    image_url = models.URLField(blank=True, null=True)  # Optional image URL for the step
+    image_url = models.URLField(blank=True, null=True)
 
     class Meta:
         ordering = ["created_at"]
