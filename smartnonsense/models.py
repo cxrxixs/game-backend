@@ -3,6 +3,17 @@ from django.db import models
 from django.utils.html import strip_tags
 
 
+class Tag(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    name = models.CharField(max_length=255, unique=True)
+    description = models.CharField(max_length=255, null=True)
+    color_hex = models.CharField(max_length=6, null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Question(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -13,6 +24,10 @@ class Question(models.Model):
     )
     text = models.TextField()  # The question text
     image_url = models.URLField(blank=True, null=True)  # Optional image URL for the question
+    tags = models.ManyToManyField(Tag, related_name="questions")  # Many-to-many relationship with Tag
+
+    class Meta:
+        ordering = ["created_at"]
 
     @property
     def correct_answer(self):

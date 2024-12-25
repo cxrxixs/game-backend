@@ -17,78 +17,83 @@
                                 <div class="col">
                                     <div class="row">
                                         <h4>
-                                            <span class="fw-bold text-black-50">QUESTION {{ forloop.counter }}:</span>{{ question.text |safe }}
+                                            <span class="fw-bold text-black-50">QUESTION {{ forloop.counter }}:</span>
                                         </h4>
-                                    </div>
-                                    {% if question.image_url %}
-                                        <div class="row">
-                                            <div class="col-3">
-                                                <img class="img-fluid" src="{{ question.image_url }}" alt="question image" />
-                                            </div>
-                                        </div>
-                                    {% endif %}
+                                        <h6>
+                                            {% for tag in question.tags.all %}<span class="badge text-bg-primary me-2">{{ tag.name }}</span>{% endfor %}
+                                        </span>
+                                    </h6>
+                                    <h5>{{ question.text |safe }}</h5>
                                 </div>
-                            </div>
-                            <!-- end question -->
-                            <div class="row">
-                                <div class="col-3">
-                                    <h4 class="fw-bold text-black-50">Choices:</h4>
+                                {% if question.image_url %}
                                     <div class="row">
-                                        {% for answer in question.options.all %}
-                                            <ul class="list-group">
-                                                {% if answer.is_correct %}
-                                                    <li class="list-group-item active">
-                                                        <span class="">{{ answer.text }}</span>
-                                                    </li>
-                                                {% else %}
-                                                    <li class="list-group-item">{{ answer.text }}</li>
-                                                {% endif %}
-                                            </ul>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- solution -->
-                            <div class="row mt-4">
-                                <div class="col">
-                                    <h4>
-                                        <span class="fw-bold text-black-50">SOLUTION:</span> {{ question.solution.content | safe }}
-                                    </h4>
-                                    {% if question.solution.image_url %}
-                                        <div class="row">
-                                            <div class="col-3">
-                                                <img class="img-fluid"
-                                                     alt="solution image"
-                                                     src="{{ question.solution.image_url }}" />
-                                            </div>
+                                        <div class="col-3">
+                                            <img class="img-fluid" src="{{ question.image_url }}" alt="question image" />
                                         </div>
-                                    {% endif %}
-                                    <h4>
-                                        <span class="fw-bold text-black-50">STEPS:</span>
-                                    </h4>
-                                    {% for step in question.solution.steps.all %}
-                                        <h5>
-                                            <span class="fw-bold text-black-50">STEP {{ forloop.counter }}</span>
-                                        </h5>
-                                        <h6>{{ step.title | safe }}</h6>
-                                        <h5>
-                                            <span class="fw-bold text-black-50">RESULT</span>
-                                        </h5>
-                                        {{ step.result | safe }}
-                                        {% if step.image_url %}
-                                            <div class="row">
-                                                <div class="col-3">
-                                                    <img class="img-fluid" alt="" src="{{ step.image_url }}" />
-                                                </div>
-                                            </div>
-                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <!-- end question -->
+                        <div class="row">
+                            <div class="col-3">
+                                <h4 class="fw-bold text-black-50">Choices:</h4>
+                                <div class="row">
+                                    {% for answer in question.options.all %}
+                                        <ul class="list-group">
+                                            {% if answer.is_correct %}
+                                                <li class="list-group-item active">
+                                                    <span class="">{{ answer.text }}</span>
+                                                </li>
+                                            {% else %}
+                                                <li class="list-group-item">{{ answer.text }}</li>
+                                            {% endif %}
+                                        </ul>
                                     {% endfor %}
                                 </div>
                             </div>
                         </div>
+                        <!-- solution -->
+                        <div class="row mt-4">
+                            <div class="col">
+                                <h4>
+                                    <span class="fw-bold text-black-50">SOLUTION:</span> {{ question.solution.content | safe }}
+                                </h4>
+                                {% if question.solution.image_url %}
+                                    <div class="row">
+                                        <div class="col-3">
+                                            <img class="img-fluid"
+                                                 alt="solution image"
+                                                 src="{{ question.solution.image_url }}" />
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                <h4>
+                                    <span class="fw-bold text-black-50">STEPS:</span>
+                                </h4>
+                                {% for step in question.solution.steps.all %}
+                                    <h5>
+                                        <span class="fw-bold text-black-50">STEP {{ forloop.counter }}</span>
+                                    </h5>
+                                    <h6>{{ step.title | safe }}</h6>
+                                    <h5>
+                                        <span class="fw-bold text-black-50">RESULT</span>
+                                    </h5>
+                                    {{ step.result | safe }}
+                                    {% if step.image_url %}
+                                        <div class="row">
+                                            <div class="col-3">
+                                                <img class="img-fluid" alt="" src="{{ step.image_url }}" />
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
                     </div>
-                {% endfor %}
-            </div>
+                </div>
+            {% endfor %}
         </div>
     </div>
+</div>
 {% endblock content %}

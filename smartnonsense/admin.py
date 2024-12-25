@@ -4,7 +4,7 @@ from django.utils.html import strip_tags
 from django_summernote.admin import SummernoteModelAdmin
 from django_summernote.widgets import SummernoteWidget
 
-from .models import Option, Question, Solution, SolutionStep
+from .models import Option, Question, Solution, SolutionStep, Tag
 
 
 # Custom form for Question to limit correct_answer options
@@ -64,13 +64,33 @@ class SolutionAdmin(SummernoteModelAdmin):
 class QuestionAdmin(SummernoteModelAdmin):
     form = QuestionAdminForm
     inlines = [OptionInline]
-    list_display = ("stripped_text", "correct_answer", "image_url")
+    list_display = (
+        "stripped_text",
+        "correct_answer",
+        "display_tags",
+        "image_url",
+    )
     search_fields = ("text",)
-    list_filter = ("options__text",)  # Optional: Add filters if necessary
+    list_filter = (
+        "tags",
+        "options__text",
+    )  # Optional: Add filters if necessary
     summernote_fields = ("text",)  # Apply Summernote to the 'text' field
+    filter_horizontal = ("tags",)
 
     # Custom method to display stripped text
     def stripped_text(self, obj):
         return strip_tags(obj.text)
 
     stripped_text.short_description = "Question Text"  # Column name in admin
+
+    def display_tags(self, obj):
+        return ", ".join(tag.name for tag in obj.tags.all())
+
+    display_tags.short_description = "Tags"
+
+
+@admin.register(Tag)
+class TagAdmin(admin.ModelAdmin):
+    list_display = ("name", "description", "created_at", "updated_at")
+    search_field = ("name",)
