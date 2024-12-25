@@ -1,4 +1,4 @@
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, HttpResponseServerError
 from django.shortcuts import render
 from django.template import Context, Template
 
@@ -10,6 +10,9 @@ def index(request: HttpResponse):
 
 
 def questions(request: HttpResponse):
-    queryset = Question.objects.select_related("solution").all()
-
-    return render(request, "questions.html", context={"title": "Questions", "questions": queryset})
+    try:
+        queryset = Question.objects.select_related("solution").all()
+        return render(request, "questions.html", context={"title": "Questions", "questions": queryset})
+    except Exception as e:
+        print(e)
+        return HttpResponseServerError()
