@@ -8,7 +8,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres
+        image: postgres:15-alpine
         ports:
           - 5432:5432
         env:
@@ -56,5 +56,8 @@ jobs:
           DJANGO_ENVIRONMENT: test
 
       - name: Run tests
+        env:
+          DJANGO_ENVIRONMENT: test
+
         run: |
           pipenv run pytest -v

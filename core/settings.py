@@ -19,15 +19,17 @@ import environ
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-DJANGO_ENVIRONMENT = os.environ.get("DJANGO_ENVIRONMENT", "dev")
 
-dotenv_file = os.path.join(BASE_DIR, "docker/.env.dev")
+DJANGO_ENVIRONMENT = os.environ.get("DJANGO_ENVIRONMENT", "dev")
 
 if DJANGO_ENVIRONMENT == "dev":
     dotenv_file = os.path.join(BASE_DIR, "docker/.env.dev")
 
-if DJANGO_ENVIRONMENT == "test":
+elif DJANGO_ENVIRONMENT == "test":
     dotenv_file = os.path.join(BASE_DIR, "docker/.env.test")
+
+else:
+    dotenv_file = os.path.join(BASE_DIR, "docker/.env.dev")
 
 
 if os.path.isfile(dotenv_file):
