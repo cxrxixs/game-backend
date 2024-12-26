@@ -1,6 +1,28 @@
+import re
+
 from rest_framework import serializers
 
 from contentmanagement.models import Question, Solution, SolutionStep, Tag
+
+
+def convert_html_to_tmp(html_text):
+    # Replace <b><i> with TMP equivalent
+    html_text = re.sub(r"<b><i>(.*?)</i></b>", r"<b><i>\1</i></b>", html_text)
+
+    # Replace <font color="#XXXXXX"> with TMP <color=#XXXXXX>
+    html_text = re.sub(r'<font color="(#[0-9A-Fa-f]{6})">', r"<color=\1>", html_text)
+
+    # Replace inline background styling with <mark=#XXXXXX>
+    html_text = re.sub(
+        r'style="background-color: rgb\((\d+), (\d+), (\d+)\);"',
+        lambda match: f"<mark=#{int(match.group(1)):02X}{int(match.group(2)):02X}{int(match.group(3)):02X}>",
+        html_text,
+    )
+
+    # Replace </font> with </color> and </mark> closing tags
+    html_text = html_text.replace("</font>", "</color>").replace("</mark>", "</mark>")
+
+    return html_text
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -10,13 +32,18 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class SolutionStepSerializer(serializers.ModelSerializer):
-    Title = serializers.CharField(source="title")
-    Result = serializers.CharField(source="result")
-    ImageUrl = serializers.URLField(source="image_url", allow_null=True)
+    title = serializers.SerializerMethodField()
+    result = serializers.SerializerMethodField()
 
     class Meta:
         model = SolutionStep
-        fields = ["Title", "Result", "ImageUrl"]
+        fields = ["title", "result", "image_url"]
+
+    def get_title(self, obj):
+        return convert_html_to_tmp(obj.title)
+
+    def get_result(self, obj):
+        return convert_html_to_tmp(obj.result)
 
 
 class SolutionSerializer(serializers.ModelSerializer):
@@ -30,7 +57,7 @@ class SolutionSerializer(serializers.ModelSerializer):
 
 
 class QuestionSerializer(serializers.ModelSerializer):
-    Question = serializers.CharField(source="text")
+    Question = serializers.SerializerMethodField()
     Solution = serializers.SerializerMethodField()
     CorrectAnswer = serializers.SerializerMethodField()
     Options = serializers.SerializerMethodField()
@@ -42,9 +69,17 @@ class QuestionSerializer(serializers.ModelSerializer):
         model = Question
         fields = ["Question", "Tags", "Solution", "CorrectAnswer", "Options", "Steps", "ImageUrl"]
 
+    def get_Question(self, obj):
+        question_text = obj.text
+        if question_text:
+            return convert_html_to_tmp(question_text)
+        return None
+
     def get_Solution(self, obj):
         if hasattr(obj, "solution"):
-            return obj.solution.content
+            solution = obj.solution.content
+            if solution:
+                return convert_html_to_tmp(solution)
         return None
 
     def get_CorrectAnswer(self, obj):
@@ -55,7 +90,8 @@ class QuestionSerializer(serializers.ModelSerializer):
 
     def get_Steps(self, obj):
         if hasattr(obj, "solution"):
-            return SolutionStepSerializer(obj.solution.steps.all(), many=True).data
+            steps = SolutionStepSerializer(obj.solution.steps.all(), many=True).data
+            return steps
         return []
 
     def get_Tags(self, obj):
