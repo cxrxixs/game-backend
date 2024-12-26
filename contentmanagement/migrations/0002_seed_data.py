@@ -13,9 +13,10 @@ def seed_data(apps, schema_editor):
     User = apps.get_model("auth", "User")
 
     # Seed Tags
-    tag1 = Tag.objects.create(name="Math")
-    tag2 = Tag.objects.create(name="Physics")
-    tag3 = Tag.objects.create(name="Science")
+    tag1 = Tag.objects.create(name="Math", description="All about numbers")
+    tag2 = Tag.objects.create(name="Physics", description="Branch of science that deals with some physical stuff")
+    tag3 = Tag.objects.create(name="Science", description="Nerdy conversations")
+    tag4 = Tag.objects.create(name="Geography", description="Something about location")
 
     # Seed User (ensure a user exists for seeding data)
     author = User.objects.first()
@@ -35,7 +36,7 @@ def seed_data(apps, schema_editor):
         text="What is the capital of France?",
         image_url="https://cdn.prod.website-files.com/649aa49e57793ed61ecbd3fd/6736aaa87530b8304ae3686b_Illustration-MAPS_8.png",
     )
-    question2.tags.add(tag3)
+    question2.tags.add(tag4)
 
     # Seed Options
     option1_q1 = Option.objects.create(question=question1, text="0.05", is_correct=True)
@@ -57,7 +58,7 @@ def seed_data(apps, schema_editor):
 
     solution2 = Solution.objects.create(
         question=question2,
-        content="The correct answer is Paris, the capital of France.",
+        content="The correct answer is <b><i>Paris</i></b>, the capital of <font color='#000000' style='background-color: rgb(255, 255, 0);'>France</font>.",
         image_url="https://cdn.prod.website-files.com/649aa49e57793ed61ecbd3fd/6528af9c46a1e17a1d572dc9_G2D.webp",
     )
 
