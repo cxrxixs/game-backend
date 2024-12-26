@@ -68,7 +68,7 @@ indent_size=2
 
 # Pytest
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "core.settings-test"
+DJANGO_SETTINGS_MODULE = "core.settings"
 python_files = "test_*.py"
 
 
