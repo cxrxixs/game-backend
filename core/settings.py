@@ -24,24 +24,19 @@ DJANGO_ENVIRONMENT = os.environ.get("DJANGO_ENVIRONMENT", "dev")
 # dotenv_file = os.path.join(BASE_DIR, "docker/.env")
 
 if DJANGO_ENVIRONMENT == "dev":
-    # debug
-    print("****DEV****")
     dotenv_file = os.path.join(BASE_DIR, "docker/.env.dev")
 
+if DJANGO_ENVIRONMENT == "local":
+    dotenv_file = os.path.join(BASE_DIR, "docker/.env.local")
+
 elif DJANGO_ENVIRONMENT == "test":
-    # debug
-    print("****TEST****")
     dotenv_file = os.path.join(BASE_DIR, "docker/.env.test")
 
 
 elif DJANGO_ENVIRONMENT == "prod":
-    # debug
-    print("****PROD****")
     dotenv_file = os.path.join(BASE_DIR, "docker/.env")
 
 else:
-    # debug
-    print("****ELSE****")
     dotenv_file = os.path.join(BASE_DIR, "docker/.env.dev")
 
 
@@ -129,26 +124,26 @@ TEMPLATES = [
 ]
 
 
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",
-        },
-    },
-    "root": {
-        "handlers": ["console"],
-        "level": "DEBUG",
-    },
-    "loggers": {
-        "django": {
-            "handlers": ["console"],
-            "level": "DEBUG",
-            "propagate": True,
-        },
-    },
-}
+# LOGGING = {
+#     "version": 1,
+#     "disable_existing_loggers": False,
+#     "handlers": {
+#         "console": {
+#             "class": "logging.StreamHandler",
+#         },
+#     },
+#     "root": {
+#         "handlers": ["console"],
+#         "level": "DEBUG",
+#     },
+#     "loggers": {
+#         "django": {
+#             "handlers": ["console"],
+#             "level": "DEBUG",
+#             "propagate": True,
+#         },
+#     },
+# }
 
 
 WSGI_APPLICATION = "core.wsgi.application"
