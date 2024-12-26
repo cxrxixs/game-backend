@@ -24,6 +24,14 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
+    env:
+      DJANGO_ENVIRONMENT: test
+      DB_NAME: db_test
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_HOST: postgres
+      DB_PORT: 5432
+
     steps:
       - name: Checkout project code
         uses: actions/checkout@v2
@@ -46,18 +54,12 @@ jobs:
       - name: Install dependencies
         if: steps.chache-pipenv.outputs.cache-hit != 'true'
         run: |
-          python -m pipenv install --dev && python -m pipenv install -r requirements/base.txt
+          python -m pipenv install -r requirements/base.txt && python -m pipenv install -r requirements/test.txt
 
       - name: Apply DB migrations
         run: |
           pipenv run python manage.py migrate
 
-        env:
-          DJANGO_ENVIRONMENT: test
-
       - name: Run tests
-        env:
-          DJANGO_ENVIRONMENT: test
-
         run: |
           pipenv run pytest -v
