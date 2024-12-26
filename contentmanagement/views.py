@@ -1,6 +1,5 @@
-from django.http import HttpRequest, HttpResponse, HttpResponseServerError
+from django.http import HttpResponse, HttpResponseServerError
 from django.shortcuts import render
-from django.template import Context, Template
 
 from .models import Question
 

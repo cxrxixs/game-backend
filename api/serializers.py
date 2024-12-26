@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from contentmanagement.models import Option, Question, Solution, SolutionStep, Tag
+from contentmanagement.models import Question, Solution, SolutionStep, Tag
 
 
 class TagSerializer(serializers.ModelSerializer):
