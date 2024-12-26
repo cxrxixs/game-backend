@@ -14,15 +14,15 @@ services:
       - ./db/psql-init/db.sql:/docker-entrypoint-initdb.d/db.sql
       - postgres_data:/var/lib/postgresql/data/
 
-  cache:
-    container_name: redis-7
-    image: redis:7.2.4-alpine
-    restart: always
-    environment:
-      - REDIS_HOST=${REDIS_HOST}
-      - REDIS_PORT=${REDIS_PORT}
-    ports:
-      - 6380:${REDIS_PORT}
+  # cache:
+  #   container_name: redis-7
+  #   image: redis:7.2.4-alpine
+  #   restart: always
+  #   environment:
+  #     - REDIS_HOST=${REDIS_HOST}
+  #     - REDIS_PORT=${REDIS_PORT}
+  #   ports:
+  #     - 6380:${REDIS_PORT}
 
   app:
     container_name: web-app
@@ -33,7 +33,7 @@ services:
     restart: always
     depends_on:
       - db
-      - cache
+      # - cache
     environment:
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}
       - DJANGO_ENVIRONMENT=${DJANGO_ENVIRONMENT}
