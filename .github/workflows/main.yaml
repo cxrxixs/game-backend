@@ -54,7 +54,7 @@ jobs:
       - name: Install dependencies
         if: steps.chache-pipenv.outputs.cache-hit != 'true'
         run: |
-          python -m pipenv install -r requirements/base.txt && python -m pipenv install -r requirements/test.txt
+          python -m pip install -r requirements/base.txt && python -m pip install -r requirements/test.txt
 
       - name: Apply DB migrations
         run: |
