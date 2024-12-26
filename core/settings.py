@@ -21,14 +21,27 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 DJANGO_ENVIRONMENT = os.environ.get("DJANGO_ENVIRONMENT", "dev")
+# dotenv_file = os.path.join(BASE_DIR, "docker/.env")
 
 if DJANGO_ENVIRONMENT == "dev":
+    # debug
+    print("****DEV****")
     dotenv_file = os.path.join(BASE_DIR, "docker/.env.dev")
 
 elif DJANGO_ENVIRONMENT == "test":
+    # debug
+    print("****TEST****")
     dotenv_file = os.path.join(BASE_DIR, "docker/.env.test")
 
+
+elif DJANGO_ENVIRONMENT == "prod":
+    # debug
+    print("****PROD****")
+    dotenv_file = os.path.join(BASE_DIR, "docker/.env")
+
 else:
+    # debug
+    print("****ELSE****")
     dotenv_file = os.path.join(BASE_DIR, "docker/.env.dev")
 
 
@@ -36,6 +49,7 @@ if os.path.isfile(dotenv_file):
     dotenv.load_dotenv(dotenv_file)
     env = environ.Env(
         DEBUG=(bool, True),
+        PLATFORM_HOST=(str, "localhost"),
     )
     environ.Env.read_env()
     DEBUG = env("DEBUG")
@@ -47,6 +61,7 @@ if os.path.isfile(dotenv_file):
     DB_PASSWORD = env("DB_PASSWORD")
     REDIS_HOST = env("REDIS_HOST")
     REDIS_PORT = env("REDIS_PORT")
+    PLATFORM_HOST = env("PLATFORM_HOST")
 else:
     DEBUG = os.environ.get("DEBUG")
     SECRET_KEY = os.environ.get("SECRET_KEY")
@@ -57,9 +72,14 @@ else:
     DB_PORT = os.environ.get("DB_PORT") or "5432"
     REDIS_HOST = os.environ.get("REDIS_HOST") or "localhost"
     REDIS_PORT = os.environ.get("REDIS_PORT") or "6379"
+    PLATFORM_HOST = os.environ.get("PLATFORM_HOST")
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
+if PLATFORM_HOST:
+    [ALLOWED_HOSTS.append(host.strip()) for host in PLATFORM_HOST.split(",")]
+
+ALLOWED_HOSTS.append("127.0.0.1")
 
 # Application definition
 
@@ -78,6 +98,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -93,6 +114,7 @@ TEMPLATES = [
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
             os.path.join(BASE_DIR, "templates"),
+            os.path.join(BASE_DIR, "../contentmanagement/templates"),
         ],
         "APP_DIRS": True,
         "OPTIONS": {
@@ -105,6 +127,29 @@ TEMPLATES = [
         },
     },
 ]
+
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "DEBUG",
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+    },
+}
+
 
 WSGI_APPLICATION = "core.wsgi.application"
 
@@ -158,6 +203,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
