@@ -69,7 +69,7 @@ indent_size=2
 # Pytest
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "core.settings"
-python_files = "test_*.py"
+python_files = "test*.py"
 
 
 [tool.coverage.run]

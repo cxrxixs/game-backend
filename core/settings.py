@@ -26,6 +26,9 @@ dotenv_file = os.path.join(BASE_DIR, "docker/.env.dev")
 if DJANGO_ENVIRONMENT == "dev":
     dotenv_file = os.path.join(BASE_DIR, "docker/.env.dev")
 
+if DJANGO_ENVIRONMENT == "test":
+    dotenv_file = os.path.join(BASE_DIR, "docker/.env.test")
+
 
 if os.path.isfile(dotenv_file):
     dotenv.load_dotenv(dotenv_file)
