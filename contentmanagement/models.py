@@ -58,6 +58,9 @@ class Solution(models.Model):
     content = models.TextField()
     image_url = models.URLField(blank=True, null=True)
 
+    class Meta:
+        ordering = ["created_at"]
+
     def __str__(self):
         return f"Solution for: {strip_tags(self.question.text)[:50]}"
 
