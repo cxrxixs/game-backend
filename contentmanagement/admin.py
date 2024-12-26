@@ -48,7 +48,8 @@ class SolutionAdmin(SummernoteModelAdmin):
     summernote_fields = ("content",)
 
     def stripped_text(self, obj):
-        return strip_tags(obj.content)
+        stripped = strip_tags(obj.text)
+        return stripped[:52] + "..." if len(stripped) > 55 else stripped
 
     stripped_text.short_description = "Solution Content"
 
@@ -72,7 +73,8 @@ class QuestionAdmin(SummernoteModelAdmin):
     filter_horizontal = ("tags",)
 
     def stripped_text(self, obj):
-        return strip_tags(obj.text)
+        stripped = strip_tags(obj.text)
+        return stripped[:52] + "..." if len(stripped) > 55 else stripped
 
     stripped_text.short_description = "Question Text"
 
