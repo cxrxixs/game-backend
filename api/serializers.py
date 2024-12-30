@@ -32,17 +32,18 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class SolutionStepSerializer(serializers.ModelSerializer):
-    title = serializers.SerializerMethodField()
-    result = serializers.SerializerMethodField()
+    Title = serializers.SerializerMethodField()
+    Result = serializers.SerializerMethodField()
+    ImageUrl = serializers.URLField(source="image_url", allow_null=True)
 
     class Meta:
         model = SolutionStep
-        fields = ["title", "result", "image_url"]
+        fields = ["Title", "Result", "ImageUrl"]
 
-    def get_title(self, obj):
+    def get_Title(self, obj):
         return convert_html_to_tmp(obj.title)
 
-    def get_result(self, obj):
+    def get_Result(self, obj):
         return convert_html_to_tmp(obj.result)
 
 
