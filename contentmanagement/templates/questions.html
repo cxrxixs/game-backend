@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% load filters %}
+
 {% block content %}
     <div class="container-fluid">
         <div class="row mt-4">
@@ -39,14 +41,16 @@
                             <div class="col-3">
                                 <h4 class="fw-bold text-black-50">Choices:</h4>
                                 <div class="row">
-                                    {% for answer in question.options.all %}
+                                    {% for index, answer in question.options.all|enumerate_queryset %}
                                         <ul class="list-group">
                                             {% if answer.is_correct %}
                                                 <li class="list-group-item active">
-                                                    <span class="">{{ answer.text }}</span>
+                                                    <span class="badge rounded-circle text-bg-light me-2">{{ index|letter }}</span> {{ answer.text }}
                                                 </li>
                                             {% else %}
-                                                <li class="list-group-item">{{ answer.text }}</li>
+                                                <li class="list-group-item">
+                                                    <span class="badge rounded-circle text-bg-secondary me-2">{{ index|letter }}</span> {{ answer.text }}
+                                                </li>
                                             {% endif %}
                                         </ul>
                                     {% endfor %}
