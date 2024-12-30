@@ -22,6 +22,9 @@ def convert_html_to_tmp(html_text):
     # Replace </font> with </color> and </mark> closing tags
     html_text = html_text.replace("</font>", "</color>").replace("</mark>", "</mark>")
 
+    # Remove <p> and </p> tags
+    html_text = re.sub(r"<p>(.*?)</p>", r"\1", html_text, flags=re.DOTALL)
+
     return html_text
 
 
