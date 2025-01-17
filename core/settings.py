@@ -88,6 +88,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "django_summernote",
     "contentmanagement",
+    "game_match",
     "api",
 ]
 
