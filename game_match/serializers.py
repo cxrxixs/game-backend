@@ -13,6 +13,8 @@ class GameMatchPlayerSerializer(serializers.ModelSerializer):
         queryset=GameMatch.objects.all(), source="game_match", label="Match ID"
     )
 
+    is_host = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = GameMatchPlayer
         fields = [
@@ -20,7 +22,11 @@ class GameMatchPlayerSerializer(serializers.ModelSerializer):
             "created_at",
             "player_id",
             "match_id",
+            "is_host",
         ]
+
+    def get_is_host(self, obj):
+        return str(obj.player_id) == str(obj.game_match.host_id)
 
     def validate(self, attrs):
         game_match = attrs["game_match"]
@@ -48,6 +54,15 @@ class GameRoundSerializer(serializers.ModelSerializer):
     class Meta:
         model = GameRound
         fields = "__all__"
+
+    def validate(self, attrs):
+        game_match = attrs["game_match"]
+        if game_match.status != game_match.Status.ONGOING:
+            raise serializers.ValidationError(
+                {"game_match": "Match is already closed."},
+            )
+
+        return attrs
 
 
 class GameMatchSerializer(serializers.ModelSerializer):

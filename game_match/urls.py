@@ -6,7 +6,7 @@ from . import views
 router = routers.DefaultRouter()
 router.register(r"gamematch", views.GameMatchViewSet, basename="gamematch")
 router.register(r"gamematchplayer", views.GameMatchPlayerViewSet, basename="gamematchplayer")
-
+router.register("gameround", views.GameRoundViewSet, basename="gameround")
 
 urlpatterns = [
     path("home/", views.index, name="home"),

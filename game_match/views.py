@@ -4,11 +4,9 @@ from django.shortcuts import render
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.reverse import reverse
-from rest_framework.views import APIView
 
-from .models import GameMatch, GameMatchPlayer
-from .serializers import GameMatchPlayerSerializer, GameMatchSerializer
+from .models import GameMatch, GameMatchPlayer, GameRound
+from .serializers import GameMatchPlayerSerializer, GameMatchSerializer, GameRoundSerializer
 
 
 def index(request: HttpRequest) -> HttpResponse:
@@ -29,7 +27,6 @@ class GameMatchViewSet(viewsets.ModelViewSet):
         if not player_id:
             return Response({"error": "player_id is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Filter to matches that are Ongoing and have a GameMatchPlayer with player_id
         queryset = self.filter_queryset(self.get_queryset()).filter(
             status=GameMatch.Status.ONGOING, players__player_id=player_id
         )
@@ -47,7 +44,6 @@ class GameMatchViewSet(viewsets.ModelViewSet):
         if not player_id:
             return Response({"error": "player_id is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Filter to matches that are Ongoing and have a GameMatchPlayer with player_id
         queryset = self.filter_queryset(self.get_queryset()).filter(
             status=GameMatch.Status.FINISHED, players__player_id=player_id
         )
@@ -65,7 +61,6 @@ class GameMatchViewSet(viewsets.ModelViewSet):
         if not player_id:
             return Response({"error": "player_id is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Filter to matches that are Ongoing and have a GameMatchPlayer with player_id
         queryset = self.filter_queryset(self.get_queryset()).filter(
             status=GameMatch.Status.EXPIRED, players__player_id=player_id
         )
@@ -113,15 +108,6 @@ class GameMatchPlayerViewSet(viewsets.ModelViewSet):
     serializer_class = GameMatchPlayerSerializer
 
 
-class APIRootView(APIView):
-    """
-    Manual root view that lists all endpoints, including custom ones.
-    """
-
-    def get(self, request, *args, **kwargs):
-        return Response({
-            "gamematch": reverse("gamematch-list", request=request),
-            "ongoing": reverse("gamematch-ongoing-matches", request=request) + "?player_id=",
-            "gamematchplayer": reverse("gamematchplayer-list", request=request),
-            # add other endpoints as desired
-        })
+class GameRoundViewSet(viewsets.ModelViewSet):
+    queryset = GameRound.objects.all()
+    serializer_class = GameRoundSerializer
