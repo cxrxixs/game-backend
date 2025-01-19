@@ -1,8 +1,8 @@
 from uuid import uuid4
 
-from django.db import models
-
-import game_match
+from django.core.exceptions import ValidationError
+from django.db import models, transaction
+from django.db.models import Max
 
 
 class GameMatch(models.Model):
@@ -11,7 +11,7 @@ class GameMatch(models.Model):
         EXPIRED = "expired", "Expired"
         FINISHED = "finished", "Finished"
 
-    match_id = models.UUIDField(default=uuid4, editable=False, unique=True)
+    match_id = models.UUIDField(primary_key=True, default=uuid4, editable=False, unique=True)
     host_id = models.CharField(max_length=50)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.ONGOING)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -26,12 +26,27 @@ class GameMatch(models.Model):
         GameMatchPlayer.objects.create(game_match=self, player_id=self.host_id)
         return self
 
+    @transaction.atomic
     def add_player(self, player_id):
         """Add a player to the game room, ensure only 2 players."""
         if self.players.count() < 2:
             GameMatchPlayer.objects.create(game_match=self, player_id=player_id)
         else:
             raise ValueError("A match can only have 2 players.")
+
+    @transaction.atomic
+    def add_round(self, question_content):
+        """
+        Create a new GameRound for this match, ensuring concurrency safety
+        by locking existing rounds. This prevents two simultaneous calls
+        from assigning the same round_index.
+        """
+        # Lock the rows so no other transaction can insert or update these until we finish.
+        self.rounds.select_for_update().all()
+        max_round_index = self.rounds.aggregate(max_index=models.Max("round_index"))["max_index"]
+        next_index = 0 if max_round_index is None else max_round_index + 1
+
+        return self.rounds.create(round_index=next_index, question_content=question_content)
 
 
 class GameMatchPlayer(models.Model):
@@ -51,7 +66,7 @@ class GameMatchPlayer(models.Model):
 class GameRound(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     game_match = models.ForeignKey(GameMatch, on_delete=models.CASCADE, related_name="rounds")
-    round_index = models.PositiveIntegerField()
+    round_index = models.PositiveIntegerField(null=True)
     question_content = models.TextField()
 
     class Meta:
@@ -59,19 +74,13 @@ class GameRound(models.Model):
             models.UniqueConstraint(fields=["game_match", "round_index"], name="uq_game_round_player"),
         ]
 
+    @transaction.atomic
     def save(self, *args, **kwargs):
-        # If this is a new instance and round_index is not explicitly set
         if not self.pk and self.round_index is None:
-            # Get the current highest round_index for this game_match
-            max_round_index = (
-                GameRound.objects.filter(game_match=self.game_match)
-                .aggregate(max_index=models.Max("round_index"))
-                .get("max_index")
-            )
-            # Increment the round index or start at 0 if no rounds exist
-            self.round_index = 0 if max_round_index is None else max_round_index + 1
+            GameRound.objects.select_for_update().filter(game_match=self.game_match)
+            max_val = GameRound.objects.filter(game_match=self.game_match).aggregate(m=Max("round_index"))["m"]
+            self.round_index = 0 if max_val is None else max_val + 1
 
-        # Call the original save method
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -81,14 +90,27 @@ class GameRound(models.Model):
 class PlayerAnswer(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     game_round = models.ForeignKey(GameRound, on_delete=models.CASCADE, related_name="answers")
-    player_id = models.UUIDField()
+    match_player = models.ForeignKey(GameMatchPlayer, on_delete=models.CASCADE, related_name="answers")
     answer_index = models.PositiveIntegerField()
     answer = models.TextField()
-    time = models.FloatField()  # Time taken by the player to answer
+    time = models.FloatField()
     question_content = models.TextField(blank=True, null=True)  # Optional
 
     class Meta:
-        unique_together = ("game_round", "player_id")
+        unique_together = ("game_round", "match_player")
+
+    def clean(self):
+        super().clean()
+        if self.match_player.game_match != self.game_round.game_match:
+            raise ValidationError("match_player must be part of game_round.")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"Answer from Player {self.player_id} in Round {self.round.round_index} of GameMatch {self.round.game_match.match_id}"
+        return (
+            f"Answer from Player {self.match_player.player_id} "
+            f"in Round {self.game_round.round_index} "
+            f"of GameMatch {self.game_round.game_match.match_id}"
+        )
