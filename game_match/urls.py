@@ -4,9 +4,10 @@ from rest_framework import routers
 from . import views
 
 router = routers.DefaultRouter()
-router.register(r"gamematch", views.GameMatchViewSet, basename="gamematch")
-router.register(r"gamematchplayer", views.GameMatchPlayerViewSet, basename="gamematchplayer")
-router.register("gameround", views.GameRoundViewSet, basename="gameround")
+router.register(r"match", views.GameMatchViewSet, basename="match")
+router.register(r"player", views.GameMatchPlayerViewSet, basename="player")
+router.register("round", views.GameRoundViewSet, basename="round")
+router.register("answer", views.PlayerAnswerViewSet, basename="answer")
 
 urlpatterns = [
     path("home/", views.index, name="home"),

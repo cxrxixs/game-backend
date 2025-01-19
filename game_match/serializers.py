@@ -32,20 +32,66 @@ class GameMatchPlayerSerializer(serializers.ModelSerializer):
         game_match = attrs["game_match"]
         if game_match.players.count() >= 2:
             raise serializers.ValidationError(
-                {"game_match": "Only 2 players are allowed in the match."},
+                {
+                    "game_match": "Only 2 players are allowed in the match.",
+                },
             )
         if game_match.status != game_match.Status.ONGOING:
             raise serializers.ValidationError(
-                {"game_match": "Match is already closed."},
+                {
+                    "game_match": "Match is already closed.",
+                },
             )
 
         return attrs
 
 
 class PlayerAnswerSerializer(serializers.ModelSerializer):
+    player_id = serializers.CharField(source="match_player.player_id", read_only=True)
+    is_host = serializers.SerializerMethodField(read_only=True)
+    round_index = serializers.IntegerField(source="game_round.round_index", read_only=True)
+
     class Meta:
         model = PlayerAnswer
         fields = "__all__"
+        extra_kwargs = {
+            "answer_index": {
+                "required": True,
+            },
+            "answer": {
+                "required": True,
+            },
+            "time": {
+                "required": True,
+            },
+        }
+
+    def get_is_host(self, obj):
+        return str(obj.match_player.player_id) == str(obj.game_round.game_match.host_id)
+
+    def validate(self, attrs):
+        game_round = attrs.get("game_round", getattr(self.instance, "game_round", None))
+        match_player = attrs.get("match_player", getattr(self.instance, "match_player", None))
+
+        if game_round and match_player:
+            if match_player.game_match != game_round.game_match:
+                raise serializers.ValidationError(
+                    {
+                        "game_match": "The match_player must be part of the same match as the game_round.",
+                    },
+                )
+            if game_round.game_match.status != game_round.game_match.Status.ONGOING:
+                raise serializers.ValidationError(
+                    {
+                        "game_match": "Match is already closed.",
+                    },
+                )
+
+        return attrs
+
+
+class AddPlayerSerializer(serializers.Serializer):
+    player_id = serializers.CharField(required=True)
 
 
 class GameRoundSerializer(serializers.ModelSerializer):
@@ -59,7 +105,9 @@ class GameRoundSerializer(serializers.ModelSerializer):
         game_match = attrs["game_match"]
         if game_match.status != game_match.Status.ONGOING:
             raise serializers.ValidationError(
-                {"game_match": "Match is already closed."},
+                {
+                    "game_match": "Match is already closed.",
+                },
             )
 
         return attrs

@@ -1,12 +1,19 @@
 from django.core.exceptions import ValidationError
+from django.db.models import BooleanField, Case, F, Value, When
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from .models import GameMatch, GameMatchPlayer, GameRound
-from .serializers import GameMatchPlayerSerializer, GameMatchSerializer, GameRoundSerializer
+from .models import GameMatch, GameMatchPlayer, GameRound, PlayerAnswer
+from .serializers import (
+    AddPlayerSerializer,
+    GameMatchPlayerSerializer,
+    GameMatchSerializer,
+    GameRoundSerializer,
+    PlayerAnswerSerializer,
+)
 
 
 def index(request: HttpRequest) -> HttpResponse:
@@ -16,6 +23,34 @@ def index(request: HttpRequest) -> HttpResponse:
 class GameMatchViewSet(viewsets.ModelViewSet):
     queryset = GameMatch.objects.all()
     serializer_class = GameMatchSerializer
+
+    @action(
+        detail=True,
+        methods=["get", "post"],
+        url_path="player",
+        serializer_class=AddPlayerSerializer,
+    )
+    def add_player_action(self, request, pk=None):
+        match = self.get_object()
+
+        if request.method == "GET":
+            players = match.players.all()
+            serializer = GameMatchPlayerSerializer(players, many=True, context=self.get_serializer_context())
+            return Response(serializer.data)
+
+        # Use the AddPlayerSerializer to validate input
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        player_id = serializer.validated_data["player_id"]
+
+        try:
+            new_player = match.add_player(player_id)
+        except ValueError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Serialize the newly created GameMatchPlayer record with its serializer
+        player_serializer = GameMatchPlayerSerializer(new_player, context=self.get_serializer_context())
+        return Response(player_serializer.data, status=201)
 
     @action(detail=False, methods=["get"], url_path="ongoing")
     def ongoing_matches(self, request):
@@ -111,3 +146,18 @@ class GameMatchPlayerViewSet(viewsets.ModelViewSet):
 class GameRoundViewSet(viewsets.ModelViewSet):
     queryset = GameRound.objects.all()
     serializer_class = GameRoundSerializer
+
+
+class PlayerAnswerViewSet(viewsets.ModelViewSet):
+    queryset = (
+        PlayerAnswer.objects.all()
+        .annotate(
+            is_host_flag=Case(
+                When(match_player__player_id=F("game_round__game_match__host_id"), then=Value(True)),
+                default=Value(False),
+                output_field=BooleanField(),
+            )
+        )
+        .order_by("-is_host_flag")
+    )
+    serializer_class = PlayerAnswerSerializer

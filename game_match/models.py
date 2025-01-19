@@ -30,10 +30,11 @@ class GameMatch(models.Model):
     @transaction.atomic
     def add_player(self, player_id):
         """Add a player to the game room, ensure only 2 players."""
-        if self.players.count() < 2:
-            GameMatchPlayer.objects.create(game_match=self, player_id=player_id)
-        else:
+        if self.players.count() >= 2:
             raise ValueError("A match can only have 2 players.")
+
+        new_player = GameMatchPlayer.objects.create(game_match=self, player_id=player_id)
+        return new_player
 
     @transaction.atomic
     def add_round(self, question_content):
