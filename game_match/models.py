@@ -21,9 +21,10 @@ class GameMatch(models.Model):
         return f"Match {self.match_id} ({self.get_status_display()})"
 
     def save(self, *args, **kwargs):
-        """Automatically add host as a player in the match."""
         super().save(*args, **kwargs)
-        GameMatchPlayer.objects.create(game_match=self, player_id=self.host_id)
+
+        # Automatically add host as player
+        GameMatchPlayer.objects.get_or_create(game_match=self, player_id=self.host_id)
         return self
 
     @transaction.atomic
@@ -58,6 +59,18 @@ class GameMatchPlayer(models.Model):
         constraints = [
             models.UniqueConstraint(fields=["game_match", "player_id"], name="uq_game_match_player"),
         ]
+
+    def clean(self):
+        super().clean()
+
+        # Limit number of allowed players to 2
+        if not self.pk:
+            if self.game_match.players.count() >= 2:
+                raise ValidationError("Only 2 players are allowed in the match.")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Player {self.player_id} in GameMatch {self.game_match.match_id}"
