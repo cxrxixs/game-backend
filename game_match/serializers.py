@@ -50,6 +50,7 @@ class PlayerAnswerSerializer(serializers.ModelSerializer):
     player_id = serializers.CharField(source="match_player.player_id", read_only=True)
     is_host = serializers.SerializerMethodField(read_only=True)
     round_index = serializers.IntegerField(source="game_round.round_index", read_only=True)
+    question_content = serializers.CharField(source="game_round.question_content", read_only=True)
 
     class Meta:
         model = PlayerAnswer
@@ -120,9 +121,20 @@ class GameMatchSerializer(serializers.ModelSerializer):
     class Meta:
         model = GameMatch
         fields = "__all__"
+        extra_kwargs = {
+            "status": {
+                # "required": False,
+                "allow_null": True,
+            },
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.instance is not None:
             self.fields["host_id"].read_only = True
             self.fields["player_id"] = serializers.CharField(write_only=True, required=False)
+
+    def create(self, validated_data):
+        if validated_data.get("status") is None:
+            validated_data["status"] = GameMatch.Status.ONGOING
+        return super().create(validated_data)

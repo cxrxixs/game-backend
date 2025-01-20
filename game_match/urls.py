@@ -5,7 +5,7 @@ from . import views
 
 router = routers.DefaultRouter()
 router.register(r"match", views.GameMatchViewSet, basename="match")
-router.register(r"player", views.GameMatchPlayerViewSet, basename="player")
+# router.register(r"players", views.GameMatchPlayerViewSet, basename="players")
 router.register("round", views.GameRoundViewSet, basename="round")
 router.register("answer", views.PlayerAnswerViewSet, basename="answer")
 

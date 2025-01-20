@@ -108,7 +108,7 @@ class PlayerAnswer(models.Model):
     answer_index = models.PositiveIntegerField()
     answer = models.TextField()
     time = models.FloatField()
-    question_content = models.TextField(blank=True, null=True)  # Optional
+    # question_content = models.TextField(blank=True, null=True)  # Optional
 
     class Meta:
         unique_together = ("game_round", "match_player")
