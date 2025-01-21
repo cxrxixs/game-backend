@@ -2,7 +2,7 @@ from uuid import uuid4
 
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
-from django.db.models import Max
+from django.db.models import Case, F, Max, Value, When
 
 
 class GameMatch(models.Model):
@@ -105,6 +105,22 @@ class GameRound(models.Model):
         return f"Round {self.round_index} in GameMatch {self.game_match.match_id}"
 
 
+class PlayerAnswerManager(models.Manager):
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .annotate(
+                is_host_flag=Case(
+                    When(match_player__player_id=F("game_round__game_match__host_id"), then=Value(True)),
+                    default=Value(False),
+                    output_field=models.BooleanField(),
+                )
+            )
+            .order_by("-is_host_flag", "created_at")
+        )
+
+
 class PlayerAnswer(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     game_round = models.ForeignKey(GameRound, on_delete=models.CASCADE, related_name="answers")
@@ -132,3 +148,5 @@ class PlayerAnswer(models.Model):
             f"in Round {self.game_round.round_index} "
             f"of GameMatch {self.game_round.game_match.match_id}"
         )
+
+    objects = PlayerAnswerManager()
