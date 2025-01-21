@@ -14,11 +14,15 @@
              id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{'/admin/contentmanagement/' }}">Manage</a>
+                    <a class="nav-link" href="{{'/admin/' }}">Manage</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'questions' %}">Questions</a>
                 </li>
-            </ul>
-        </div>
-    </nav>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'match-home' %}">Match</a>
+            </li>
+        </ul>
+    </div>
+</nav>

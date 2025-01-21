@@ -23,4 +23,5 @@ urlpatterns = [
     path("summernote/", include("django_summernote.urls")),
     path("", include("contentmanagement.urls")),
     path("api/", include("api.urls")),
+    path("game/", include("game_match.urls")),
 ]
