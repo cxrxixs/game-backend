@@ -29,7 +29,7 @@
                                     {% for player in match.players.all %}
                                         <p>
                                             {{ player.player_id }}
-                                            {% if player.is_host %}<span class="bage rounded-pill text-bg-primary h6">host</span>{% endif %}
+                                            {% if player.is_host %}<span class="bage rounded text-bg-primary">host</span>{% endif %}
                                         </p>
                                     {% endfor %}
                                 </td>

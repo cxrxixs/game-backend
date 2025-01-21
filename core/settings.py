@@ -87,6 +87,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "django_summernote",
+    "drf_spectacular",
     "contentmanagement",
     "game_match",
     "api",
@@ -226,7 +227,14 @@ REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": [
         "rest_framework.renderers.JSONRenderer",
     ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 if DEBUG:
     REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"].append("rest_framework.renderers.BrowsableAPIRenderer")
+
+SPECTACULAR_SETTINGS = {
+    "POSTPROCESSING_HOOKS": ["core.hooks.exclude_api_paths"],
+    "TITLE": "Game Matching API",
+    "VERSION": "0.0.1",
+}
