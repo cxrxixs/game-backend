@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="row mt-4">
+            <div class="col text-center">
+                <h1>Game Match</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Match ID</th>
+                            <th scope="col">Created</th>
+                            <th scope="col">Players</th>
+                            <th scope="col">Rounds</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Last update</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for match in matches %}
+                            <tr>
+                                <th scope="row">{{ match.match_id }}</th>
+                                <td>{{ match.created_at }}</td>
+                                <td>
+                                    {% for player in match.players.all %}
+                                        <p>
+                                            {{ player.player_id }}
+                                            {% if player.is_host %}<span class="bage rounded-pill text-bg-primary h6">host</span>{% endif %}
+                                        </p>
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    <div class="accordion accordion-flush" id="accordionFlushExample">
+                                        {% for round in match.rounds.all %}
+                                            <div class="accordion-item">
+                                                <h2 class="accordion-header" id="flush-heading-{{ round.id }}">
+                                                    <button class="accordion-button collapsed"
+                                                            type="button"
+                                                            data-bs-toggle="collapse"
+                                                            data-bs-target="#flush-collapse-{{ round.id }}"
+                                                            aria-expanded="false"
+                                                            aria-controls="flush-collapse-{{ round.id }}">
+                                                        Round {{ round.round_index|add:"1" }}
+                                                    </button>
+                                                </h2>
+                                                <div id="flush-collapse-{{ round.id }}"
+                                                     class="accordion-collapse collapse"
+                                                     aria-labelledby="flush-heading-{{ round.id }}"
+                                                     data-bs-parent="#accordionFlushExample">
+                                                    <p class="text-body-secondary">{{ round.question_content }}</p>
+                                                    <div class="accordion-body">
+                                                        <!-- Accordion for Answers -->
+                                                        <div class="accordion accordion-flush"
+                                                             id="accordionAnswers-{{ round.id }}">
+                                                            {% for answer in round.answers.all %}
+                                                                <div class="accordion-item">
+                                                                    <h2 class="accordion-header" id="answer-heading-{{ answer.id }}">
+                                                                        <button class="accordion-button collapsed fw-bold"
+                                                                                type="button"
+                                                                                data-bs-toggle="collapse"
+                                                                                data-bs-target="#answer-collapse-{{ answer.id }}"
+                                                                                aria-expanded="false"
+                                                                                aria-controls="answer-collapse-{{ answer.id }}">
+                                                                            {{ answer.match_player.player_id }}
+                                                                        </button>
+                                                                    </h2>
+                                                                    <div id="answer-collapse-{{ answer.id }}"
+                                                                         class="accordion-collapse collapse"
+                                                                         aria-labelledby="answer-heading-{{ answer.id }}"
+                                                                         data-bs-parent="#accordionAnswers-{{ round.id }}">
+                                                                        <div class="accordion-body">
+                                                                            <!-- answer details  -->
+                                                                            <p>Answer index: {{ answer.answer_index }}</p>
+                                                                            <p>Answer: {{ answer.answer }}</p>
+                                                                            <p>Time: {{ answer.time }}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            {% empty %}
+                                                                <p>No answers for this round.</p>
+                                                            {% endfor %}
+                                                        </div>
+                                                        <!-- End of Nested Accordion for Answers -->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% empty %}
+                                            <p>No rounds available for this match.</p>
+                                        {% endfor %}
+                                    </div>
+                                </td>
+                                <td>{{ match.get_status_display }}</td>
+                                <td>{{ match.updated_at }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

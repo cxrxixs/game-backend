@@ -61,6 +61,10 @@ class GameMatchPlayer(models.Model):
             models.UniqueConstraint(fields=["game_match", "player_id"], name="uq_game_match_player"),
         ]
 
+    @property
+    def is_host(self):
+        return str(self.player_id) == str(self.game_match.host_id)
+
     def clean(self):
         super().clean()
 
@@ -80,7 +84,7 @@ class GameMatchPlayer(models.Model):
 class GameRound(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     game_match = models.ForeignKey(GameMatch, on_delete=models.CASCADE, related_name="rounds")
-    round_index = models.PositiveIntegerField(null=True)
+    round_index = models.PositiveIntegerField(null=True, blank=True)
     question_content = models.TextField()
 
     class Meta:

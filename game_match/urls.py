@@ -10,6 +10,6 @@ router.register("round", views.GameRoundViewSet, basename="round")
 router.register("answer", views.PlayerAnswerViewSet, basename="answer")
 
 urlpatterns = [
-    path("home/", views.index, name="home"),
+    path("home/", views.index, name="match-home"),
     path("", include(router.urls)),
 ]
