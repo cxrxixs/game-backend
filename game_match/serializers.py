@@ -46,13 +46,9 @@ class GameMatchPlayerSerializer(serializers.ModelSerializer):
         return attrs
 
 
-from rest_framework import serializers
-
-from .models import GameMatchPlayer, PlayerAnswer
-
-
 class PlayerAnswerSerializer(serializers.ModelSerializer):
     player_id = serializers.CharField(source="match_player.player_id", required=False)
+    game_round_id = serializers.PrimaryKeyRelatedField(queryset=GameRound.objects.all(), source="game_round")
     is_host = serializers.SerializerMethodField(read_only=True)
     round_index = serializers.IntegerField(source="game_round.round_index", read_only=True)
     question_content = serializers.CharField(source="game_round.question_content", read_only=True)
@@ -63,7 +59,7 @@ class PlayerAnswerSerializer(serializers.ModelSerializer):
             "id",
             "created_at",
             "player_id",
-            "game_round",
+            "game_round_id",
             "answer_index",
             "answer",
             "time",
@@ -96,8 +92,10 @@ class PlayerAnswerSerializer(serializers.ModelSerializer):
 
         try:
             match_player_obj = GameMatchPlayer.objects.get(player_id=player_id_value, game_match=game_round.game_match)
+
         except GameMatchPlayer.DoesNotExist:
             raise serializers.ValidationError({"player_id": "No matching player found for this match."})
+
         except GameMatchPlayer.MultipleObjectsReturned:
             raise serializers.ValidationError({"player_id": "Multiple players found for this ID in the match."})
 
