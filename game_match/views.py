@@ -16,7 +16,7 @@ from .serializers import (
 )
 
 
-def index(request: HttpRequest) -> HttpResponse:
+def summary(request: HttpRequest) -> HttpResponse:
     queryset = GameMatch.objects.all()
     return render(request, "game_match.html", context={"title": "Game Match", "matches": queryset})
 
