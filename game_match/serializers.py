@@ -46,49 +46,73 @@ class GameMatchPlayerSerializer(serializers.ModelSerializer):
         return attrs
 
 
+from rest_framework import serializers
+
+from .models import GameMatchPlayer, PlayerAnswer
+
+
 class PlayerAnswerSerializer(serializers.ModelSerializer):
-    player_id = serializers.CharField(source="match_player.player_id", read_only=True)
+    player_id = serializers.CharField(source="match_player.player_id", required=False)
     is_host = serializers.SerializerMethodField(read_only=True)
     round_index = serializers.IntegerField(source="game_round.round_index", read_only=True)
     question_content = serializers.CharField(source="game_round.question_content", read_only=True)
 
     class Meta:
         model = PlayerAnswer
-        fields = "__all__"
+        fields = [
+            "id",
+            "created_at",
+            "player_id",
+            "game_round",
+            "answer_index",
+            "answer",
+            "time",
+            "round_index",
+            "question_content",
+            "is_host",
+        ]
         extra_kwargs = {
-            "answer_index": {
-                "required": True,
-            },
-            "answer": {
-                "required": True,
-            },
-            "time": {
-                "required": True,
-            },
+            "answer_index": {"required": True},
+            "answer": {"required": True},
+            "time": {"required": True},
         }
 
     def get_is_host(self, obj):
         return str(obj.match_player.player_id) == str(obj.game_round.game_match.host_id)
 
-    def validate(self, attrs):
-        game_round = attrs.get("game_round", getattr(self.instance, "game_round", None))
-        match_player = attrs.get("match_player", getattr(self.instance, "match_player", None))
+    def create(self, validated_data):
+        # Extract player_id from the input data mapped to match_player.player_id
+        match_player_data = validated_data.pop("match_player", {})
+        player_id_value = match_player_data.get("player_id")
 
-        if game_round and match_player:
-            if match_player.game_match != game_round.game_match:
-                raise serializers.ValidationError(
-                    {
-                        "game_match": "The match_player must be part of the same match as the game_round.",
-                    },
-                )
+        # player_id_value = validated_data.pop("player_id", None)
+
+        if not player_id_value:
+            raise serializers.ValidationError({"player_id": "This field is required."})
+
+        game_round = validated_data.get("game_round")
+        if not game_round:
+            raise serializers.ValidationError({"game_round": "This field is required."})
+
+        try:
+            match_player_obj = GameMatchPlayer.objects.get(player_id=player_id_value, game_match=game_round.game_match)
+        except GameMatchPlayer.DoesNotExist:
+            raise serializers.ValidationError({"player_id": "No matching player found for this match."})
+        except GameMatchPlayer.MultipleObjectsReturned:
+            raise serializers.ValidationError({"player_id": "Multiple players found for this ID in the match."})
+
+        validated_data["match_player"] = match_player_obj
+
+        game_round = validated_data.get("game_round")
+        if game_round:
+            if match_player_obj.game_match != game_round.game_match:
+                raise serializers.ValidationError({
+                    "player_id": "The specified player must be part of the same match as the game round."
+                })
             if game_round.game_match.status != game_round.game_match.Status.ONGOING:
-                raise serializers.ValidationError(
-                    {
-                        "game_match": "Match is already closed.",
-                    },
-                )
+                raise serializers.ValidationError({"match_id": "Match is already closed."})
 
-        return attrs
+        return super().create(validated_data)
 
 
 class AddPlayerSerializer(serializers.Serializer):
@@ -97,10 +121,19 @@ class AddPlayerSerializer(serializers.Serializer):
 
 class GameRoundSerializer(serializers.ModelSerializer):
     answers = PlayerAnswerSerializer(many=True, read_only=True)
+    match_id = serializers.PrimaryKeyRelatedField(queryset=GameMatch.objects.all(), source="game_match")
 
     class Meta:
         model = GameRound
-        fields = "__all__"
+        # fields = "__all__"
+        fields = (
+            "id",
+            "created_at",
+            "match_id",
+            "round_index",
+            "question_content",
+            "answers",
+        )
 
     def validate(self, attrs):
         game_match = attrs["game_match"]

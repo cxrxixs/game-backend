@@ -162,3 +162,14 @@ class PlayerAnswerViewSet(viewsets.ModelViewSet):
         .order_by("-is_host_flag")
     )
     serializer_class = PlayerAnswerSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            self.perform_create(serializer)
+        except ValidationError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(serializer.data)
