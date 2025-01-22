@@ -77,11 +77,8 @@ class PlayerAnswerSerializer(serializers.ModelSerializer):
         return str(obj.match_player.player_id) == str(obj.game_round.game_match.host_id)
 
     def create(self, validated_data):
-        # Extract player_id from the input data mapped to match_player.player_id
         match_player_data = validated_data.pop("match_player", {})
         player_id_value = match_player_data.get("player_id")
-
-        # player_id_value = validated_data.pop("player_id", None)
 
         if not player_id_value:
             raise serializers.ValidationError({"player_id": "This field is required."})
@@ -123,7 +120,6 @@ class GameRoundSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GameRound
-        # fields = "__all__"
         fields = (
             "id",
             "created_at",
@@ -132,6 +128,7 @@ class GameRoundSerializer(serializers.ModelSerializer):
             "question_content",
             "answers",
         )
+        read_only_fields = ("round_index",)
 
     def validate(self, attrs):
         game_match = attrs["game_match"]
