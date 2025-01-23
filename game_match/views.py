@@ -172,4 +172,4 @@ class PlayerAnswerViewSet(viewsets.ModelViewSet):
         except ValidationError as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
