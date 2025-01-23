@@ -1,127 +1,108 @@
 # game-backend
 
+## Deployment
 
-### Deploying the application locally
-Requires docker and docker compose
+### Local Deployment
 
-Go to `docker` directory
-```shell
-cd docker
+This project requires Docker and Docker Compose.
 
-```
+1.  Navigate to the `docker` directory:
 
-While inside the docker directory run docker and build the image.
-```shell
-docker compose --env-file .env.dev up --build
-```
+    ```bash
+    cd docker
+    ```
 
-The application will be accessible via `localhost:8000`
+2.  Run the following command to build and start the application:
 
-The user `admin` is automatically created.
+    ```bash
+    docker compose --env-file .env.dev up --build
+    ```
 
-To access the manage page, login using the credentials
-User: `admin`
-Password: `admin123`
+3.  The application will be accessible at `localhost:8000`.
 
+4.  An admin user is automatically created with the following credentials:
 
-The API endpoint is on `localhost:8000/api/questions/`
+    *   Username: `admin`
+    *   Password: `admin123`
 
+5.  The admin interface is available at `localhost:8000/admin`.
 
+6.  The main API endpoint is `localhost:8000/api/questions/`.
 
-### Game Matching API
+## API Documentation
 
-Detailed request/response schema is also available at `/api/docs/`
+### Detailed request/response schemas are available at `/api/docs/`.
 
-#### Match
+### Match API (`/game/match`)
 
-* Create new match
+#### Create a new match (`POST`)
 
-        Endpoint: /game/match/
-        Method: POST
-        Request parameters:
-            host_id  - ID of player
+*   Endpoint: `/game/match/`
+*   Request parameters:
+    *   `host_id`: ID of the player hosting the match.
 
+#### List all matches (`GET`)
 
-* List all matches
+*   Endpoint: `/game/match/`
 
-        Endpoint: /game/match/
-        Method: GET
+#### Fetch match details (`GET`)
 
+*   Endpoint: `/game/match/<match_id>/`
 
-* Fetch match details
+#### Add player to the match (`POST`)
 
-        Endpoint: /game/match/<match_id>/
-        Method: GET
+*   Endpoint: `/game/match/<match_id>/player/`
+*   Request parameters:
+    *   `player_id`: ID of the player joining the match.
 
+#### Fetch player's ongoing match (`GET`)
 
-* Add player to the match
+*   Endpoint: `/game/match/ongoing/?player_id=<player_id>/`
+*   Query parameters:
+    *   `player_id`: ID of the player.
 
-        Endpoint: /game/match/<match_id>/player/
-        Method: POST
-        Request parameters:
-            player_id  - ID of player
+#### Update match status (`PUT`)
 
+*   Endpoint: `/game/match/<match_id>/`
+*   Request parameters:
+    *   `player_id`: ID of a player in the match.
+    *   `status`: Must be one of: `ongoing`, `expired`, or `finished`.
 
-* Fetch player's ongoing match
+#### Delete match (`DELETE`)
 
-        Endpoint: /game/match/ongoing/?player_id=<player_id>/
-        Method: GET
-        Query params:
-            player_id - ID of player
+*   Endpoint: `/game/match/<match_id>/`
 
+### Round API (`/game/round`)
 
-* Update match status
+#### Create a round (`POST`)
 
-        Endpoint: /game/match/<match_id>/
-        Method: PUT
-        Request parameters:
-            player_id - ID of player that is member of the match
-               status - Must be one of this choices `ongoing`, `expired`, `finsihed`
+*   Endpoint: `/game/round/`
+*   Request parameters:
+    *   `match_id`: ID of the match.
+    *   `question_content`: The question for the round.
 
+#### List all rounds (`GET`)
 
-* Delete match
+*   Endpoint: `/game/round/`
 
-        Endpoint: /game/match/<match_id>/
-        Method: DELETE
+#### Fetch round details (`GET`)
 
+*   Endpoint: `/game/round/<round_id>/`
 
-#### Round
+### Answer API (`/game/answer`)
 
-* Create round
+#### Create an answer (`POST`)
 
-        Endpoint: /game/round/
-        Method: POST
-        Request parameters:
-            match_id - ID of the match
-            question_content - Question for the round
+*   Endpoint: `/game/answer/`
+*   Request parameters:
+    *   `player_id`: ID of the player.
+    *   `game_round_id`: ID of the round.
+    *   `answer_index`: Index of the answer.
+    *   `answer`: The answer text.
+    *   `time`: Time taken to answer.
 
+#### List all answers (`GET`)
 
-* List all rounds
+*   Endpoint: `/game/answer/`
 
-        Endpoint: /game/round/
-        Method: GET
-
-
-* Fetch round details
-
-        Endpoint: /game/round/<round_id>/
-        Method: GET
-
-
-#### Answer
-
-* Create answer
-
-        Endpoint: /game/answer/
-        Method: POST
-        Request parameters:
-                player_id - ID of the player
-            game_round_id - ID of the match round
-             answer_index - Index of the answer
-                   answer - Answer (text)
-                     time - Time took the player to answer
-
-* List all answers
-
-        Endpoint: /game/answer/
-        Method: GET
+## Summary of the game match is also available at `/game/summary/`
