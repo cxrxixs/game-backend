@@ -19,12 +19,27 @@ from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
+"""
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("auth", include("dj_rest_auth.urls")),
+    path("auth/registration/", include("dj_rest_auth.registration.urls")),
+    path("", include("users.urls")),
     path("summernote/", include("django_summernote.urls")),
     path("", include("contentmanagement.urls")),
     path("api/", include("api.urls")),
     path("game/", include("game_match.urls")),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
+]
+"""
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("dj-rest-auth/", include("dj_rest_auth.urls")),
+    path("dj-rest-auth/registration/", include("dj_rest_auth.registration.urls")),
+    path("accounts/", include("allauth.urls")),
+    path("users/", include("users.urls")),
+    path("apps/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path("apps/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
 ]

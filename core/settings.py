@@ -85,12 +85,23 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "rest_framework",
+    "django.contrib.sites",  # Required by allauth
+    # Third party apps
     "django_summernote",
     "drf_spectacular",
+    "rest_framework",
+    "rest_framework.authtoken",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
+    "dj_rest_auth",
+    "dj_rest_auth.registration",
+    # Local apps
     "contentmanagement",
     "game_match",
     "api",
+    "users",
 ]
 
 MIDDLEWARE = [
@@ -101,6 +112,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "allauth.account.middleware.AccountMiddleware",  # Add this line
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
@@ -224,6 +236,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.TokenAuthentication",
+        # "rest_framework.authentication.SessionAuthentication",
+    ),
     "DEFAULT_RENDERER_CLASSES": [
         "rest_framework.renderers.JSONRenderer",
     ],
@@ -237,4 +253,25 @@ SPECTACULAR_SETTINGS = {
     "POSTPROCESSING_HOOKS": ["core.hooks.exclude_api_paths"],
     "TITLE": "Game Matching API",
     "VERSION": "0.0.1",
+}
+
+
+SITE_ID = 1
+
+AUTHENTICATION_BACKENDS = (
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+)
+
+ACCOUNT_EMAIL_VERIFICATION = "none"  # For simplicity; adjust as needed
+ACCOUNT_AUTHENTICATION_METHOD = "username"  # or 'email'/'username_email'
+ACCOUNT_EMAIL_REQUIRED = True
+
+LOGIN_REDIRECT_URL = "/"
+
+
+# DJ-Rest-Auth Settings
+REST_USE_JWT = False  # If you prefer token-based auth
+REST_AUTH_REGISTER_SERIALIZERS = {
+    "REGISTER_SERIALIZER": "accounts.serializers.CustomRegisterSerializer",
 }
